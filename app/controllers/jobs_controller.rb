@@ -18,7 +18,7 @@ class JobsController < ApplicationController
   end
 
   def create
-    authorize! :can_edit_sub_objects, workspace
+    authorize! :can_edit_sub_objects, workspacejo
 
     job = Job.create!(params[:job])
     workspace.jobs << job

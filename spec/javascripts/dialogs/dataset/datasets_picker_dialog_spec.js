@@ -1,5 +1,6 @@
 describe("chorus.dialogs.DatasetsPicker", function() {
     var dialog, datasets, datasetModels;
+
     beforeEach(function() {
         stubModals();
         datasets = new chorus.collections.WorkspaceDatasetSet([], {workspaceId: "33", type: "SANDBOX_TABLE", objectType: "TABLE" });
@@ -35,7 +36,7 @@ describe("chorus.dialogs.DatasetsPicker", function() {
                 expect(dialog.$("h1")).toContainTranslation("dataset.pick_destination");
             });
 
-            it("shows the correct search help", function() {
+            it("shows the correct search placeholder", function() {
                 expect(dialog.$("input.chorus_search").attr("placeholder")).toMatchTranslation("dataset.dialog.search_table");
             });
 

@@ -13,15 +13,30 @@ describe("chorus.views.JobContentDetails", function () {
             this.view.$("button.create_task").click();
         });
 
-        it("enables the 'Import Source Data'", function () {
-            expect(this.qtipElement.find(".import_source_data")).toExist();
-            expect(this.qtipElement.find(".import_source_data")).not.toHaveClass("disabled");
+        it("enables the 'Import Source Data' link", function () {
+            expect(this.qtipElement.find(".import_source_data").text()).toMatchTranslation("job_task.action.import_source_data");
+        });
+
+        it("enables the 'Run Workflow' link", function() {
+            expect(this.qtipElement.find(".run_work_flow").text()).toMatchTranslation("job_task.action.run_work_flow");
+        });
+
+        context("clicking on 'Run Work Flow'", function () {
+            it("launches the WorkFlowPicker dialog", function() {
+                expect(this.modalSpy).not.toHaveModal(chorus.dialogs.CreateWorkFlowTask);
+                this.qtipElement.find('.run_work_flow').click();
+                expect(this.modalSpy).toHaveModal(chorus.dialogs.CreateWorkFlowTask);
+            });
+
+            it("launches the picker dialog with only work flows", function() {
+                expect(this.modalSpy.modals[0].options.fileType).toBe('alpine');
+            });
+
         });
 
         context("clicking on 'Add Import Source Data'", function () {
             it("launches the CreateImportSourceDataTask dialog", function () {
                 expect(this.modalSpy).not.toHaveModal(chorus.dialogs.CreateImportSourceDataTask);
-                expect(this.qtipElement.find('.import_source_data')).toContainTranslation('job_task.action.import_source_data');
                 this.qtipElement.find('.import_source_data').click();
                 expect(this.modalSpy).toHaveModal(chorus.dialogs.CreateImportSourceDataTask);
             });

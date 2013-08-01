@@ -85,6 +85,10 @@ describe WorkfilesController do
     generate_fixture "workfileSet.json" do
       get :index, :workspace_id => workspace.id
     end
+
+    generate_fixture "workFlowSet.json" do
+      get :index, :workspace_id => workspace.id, :file_type => 'alpine'
+    end
   end
 
   describe "#show" do
