@@ -53,7 +53,7 @@ class ChorusExecutor
   end
 
   def start_alpine
-    system("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/startup_for_chorus.sh")
+    system("#{@destination_path}/alpine/startup_for_chorus.sh")
   end
 
   private

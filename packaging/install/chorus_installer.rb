@@ -551,11 +551,11 @@ class ChorusInstaller
   end
 
   def configure_alpine
-    set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
-    set_alpine_properties
-
     alpine_installer = Dir.glob(File.join(alpine_source_path, 'Alpine*.zip')).first
     extract_alpine(alpine_installer)
+
+    set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
+    set_alpine_properties
 
     server_xml_filename = "#{alpine_destination_path}/apache-tomcat-7.0.40/conf/system.xml"
     server_xml = File.read(server_xml_filename)
