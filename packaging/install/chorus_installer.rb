@@ -557,7 +557,7 @@ class ChorusInstaller
     set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
     set_alpine_properties
 
-    server_xml_filename = "#{alpine_destination_path}/apache-tomcat-7.0.40/conf/system.xml"
+    server_xml_filename = "#{alpine_destination_path}/apache-tomcat-7.0.30/conf/system.xml"
     server_xml = File.read(server_xml_filename)
     server_xml.gsub!('port="8080"', 'port="9090"')
     File.open(server_xml_filename, 'w').write(server_xml)
