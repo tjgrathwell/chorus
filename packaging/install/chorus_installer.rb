@@ -25,8 +25,13 @@ class ChorusInstaller
   DEFAULT_PATH = "/usr/local/greenplum-chorus"
   DEFAULT_DATA_PATH = "/data/greenplum-chorus"
 
-  ALPINE_SOURCE_PATH = File.join(File.dirname(__FILE__), '../../vendor/alpine')
-  ALPINE_DESTINATION_PATH = "/usr/local/greenplum-chorus/alpine"
+  def alpine_source_path
+    File.join(release_path, 'vendor', 'alpine')
+  end
+
+  def alpine_destination_path
+    File.join(destination_path, 'alpine')
+  end
 
   def initialize(options={})
     @installer_home = options[:installer_home]
@@ -542,17 +547,17 @@ class ChorusInstaller
   end
 
   def alpine_exists?
-    File.exist? ALPINE_SOURCE_PATH
+    File.exist? alpine_source_path
   end
 
   def configure_alpine
     set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
     set_alpine_properties
 
-    alpine_installer =  Dir.glob(File.join(ALPINE_SOURCE_PATH, 'Alpine*.zip')).first
+    alpine_installer = Dir.glob(File.join(alpine_source_path, 'Alpine*.zip')).first
     extract_alpine(alpine_installer)
 
-    server_xml_filename = "#{ALPINE_DESTINATION_PATH}/apache-tomcat-7.0.40/conf/system.xml"
+    server_xml_filename = "#{alpine_destination_path}/apache-tomcat-7.0.40/conf/system.xml"
     server_xml = File.read(server_xml_filename)
     server_xml.gsub!('port="8080"', 'port="9090"')
     File.open(server_xml_filename, 'w').write(server_xml)
@@ -563,7 +568,9 @@ class ChorusInstaller
   end
 
   def extract_alpine(alpine_installer)
-    system("unzip #{alpine_installer} -d #{ALPINE_DESTINATION_PATH}")
+    log "Extracting #{alpine_installer} to #{alpine_destination_path}" do
+      system("unzip #{alpine_installer} -d #{alpine_destination_path}")
+    end
   end
 
   def set_properties(new_properties)
@@ -578,7 +585,7 @@ class ChorusInstaller
 chorus.active = true
 chorus.port = 8080'
     CONFIG
-    alpine_config_filename = "#{ALPINE_DESTINATION_PATH}/ALPINE_DATA_REPOSITORY/configuration/alpine.config"
+    alpine_config_filename = "#{alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/alpine.config"
     File.open(alpine_config_filename, 'w').write(alpine_config)
   end
 

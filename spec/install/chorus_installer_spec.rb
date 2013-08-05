@@ -1209,10 +1209,14 @@ describe ChorusInstaller do
   end
 
   describe "#alpine_exists?" do
+    before do
+      stub_version
+    end
+
     context "if alpine package exists" do
       before do
-        FileUtils.mkdir_p(ChorusInstaller::ALPINE_SOURCE_PATH)
-        File.open("#{ChorusInstaller::ALPINE_SOURCE_PATH}/Alpine_Bundle_Rel2.9_single_linux_20130726-0601.zip", 'w') do |f|
+        FileUtils.mkdir_p(installer.alpine_source_path)
+        File.open("#{installer.alpine_source_path}/Alpine_Bundle_Rel2.9_single_linux_20130726-0601.zip", 'w') do |f|
           f.puts "i am alpine"
         end
       end
@@ -1231,14 +1235,16 @@ describe ChorusInstaller do
 
   describe "#configure_alpine" do
     before do
-      FileUtils.mkdir_p(ChorusInstaller::ALPINE_SOURCE_PATH)
-      File.open("#{ChorusInstaller::ALPINE_SOURCE_PATH}/Alpine_Bundle_Rel2.9_single_linux_20130726-0601.zip", 'w') do |f|
+      installer.destination_path = '/usr/local/greenplum-chorus'
+      stub_version
+      FileUtils.mkdir_p(installer.alpine_source_path)
+      File.open("#{installer.alpine_source_path}/Alpine_Bundle_Rel2.9_single_linux_20130726-0601.zip", 'w') do |f|
         f.puts "i am alpine"
       end
-      FileUtils.mkdir_p("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/apache-tomcat-7.0.40/conf/")
-      FileUtils.mkdir_p("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/ALPINE_DATA_REPOSITORY/configuration/")
+      FileUtils.mkdir_p("#{installer.alpine_destination_path}/apache-tomcat-7.0.40/conf/")
+      FileUtils.mkdir_p("#{installer.alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/")
 
-      File.open("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/apache-tomcat-7.0.40/conf/system.xml", 'w') do |f|
+      File.open("#{installer.alpine_destination_path}/apache-tomcat-7.0.40/conf/system.xml", 'w') do |f|
         f.puts <<-XML
 <Connector port="8080" protocol="HTTP/1.1"
 connectionTimeout="20000"
@@ -1259,7 +1265,7 @@ redirectPort="8443" />
     it "sets properties in alpine's config to enable chorus mode" do
       installer.configure_alpine
 
-      alpine_config = File.read("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/ALPINE_DATA_REPOSITORY/configuration/alpine.config")
+      alpine_config = File.read("#{installer.alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/alpine.config")
       alpine_config.should == <<-CONFIG
 chorus.active = true
 chorus.port = 8080'
@@ -1269,7 +1275,7 @@ chorus.port = 8080'
     it "sets properties in alpine's tomcat config to set port" do
       installer.configure_alpine
 
-      changed_xml = File.read("#{ChorusInstaller::ALPINE_DESTINATION_PATH}/apache-tomcat-7.0.40/conf/system.xml")
+      changed_xml = File.read("#{installer.alpine_destination_path}/apache-tomcat-7.0.40/conf/system.xml")
       changed_xml.should == <<-XML
 <Connector port="9090" protocol="HTTP/1.1"
 connectionTimeout="20000"
