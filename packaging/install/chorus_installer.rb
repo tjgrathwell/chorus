@@ -25,6 +25,9 @@ class ChorusInstaller
   DEFAULT_PATH = "/usr/local/greenplum-chorus"
   DEFAULT_DATA_PATH = "/data/greenplum-chorus"
 
+  ALPINE_SOURCE_PATH = File.join(File.dirname(__FILE__), '../../vendor/alpine')
+  ALPINE_DESTINATION_PATH = "/usr/local/greenplum-chorus/alpine"
+
   def initialize(options={})
     @installer_home = options[:installer_home]
     @version_detector = options[:version_detector]
@@ -423,6 +426,12 @@ class ChorusInstaller
       end
     end
 
+    if alpine_exists?
+      log "Setting up alpine..." do
+        configure_alpine
+      end
+    end
+
     link_current_to_release
 
     flush_logs
@@ -445,10 +454,7 @@ class ChorusInstaller
     log_at_end "OS X Users:"
     log_at_end "The properties file 'shared/chorus.properties' has had the number of worker_threads and webserver_threads reduced to 5 and the number of database_threads reduced to 15."
 
-    properties_file = File.join(destination_path, "shared", "chorus.properties")
-    properties = Properties.load_file(properties_file)
-    properties.merge!({"worker_threads" => 5, "webserver_threads" => 5, "database_threads" => 15})
-    Properties.dump_file(properties, properties_file)
+    set_properties({"worker_threads" => 5, "webserver_threads" => 5, "database_threads" => 15})
   end
 
   def remove_and_restart_previous!
@@ -533,6 +539,47 @@ class ChorusInstaller
       @logger.log("#{path}: #{File.open(path).readlines.first}".chomp)
     end
     @logger.log("=== ENVIRONMENT INFO END")
+  end
+
+  def alpine_exists?
+    File.exist? ALPINE_SOURCE_PATH
+  end
+
+  def configure_alpine
+    set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
+    set_alpine_properties
+
+    alpine_installer =  Dir.glob(File.join(ALPINE_SOURCE_PATH, 'Alpine*.zip')).first
+    extract_alpine(alpine_installer)
+
+    server_xml_filename = "#{ALPINE_DESTINATION_PATH}/apache-tomcat-7.0.40/conf/system.xml"
+    server_xml = File.read(server_xml_filename)
+    server_xml.gsub!('port="8080"', 'port="9090"')
+    File.open(server_xml_filename, 'w').write(server_xml)
+
+    log "Starting alpine..." do
+      @executor.start_alpine
+    end
+  end
+
+  def extract_alpine(alpine_installer)
+    system("unzip #{alpine_installer} -d #{ALPINE_DESTINATION_PATH}")
+  end
+
+  def set_properties(new_properties)
+    properties_file = File.join(destination_path, "shared", "chorus.properties")
+    properties = Properties.load_file(properties_file)
+    properties.merge!(new_properties)
+    Properties.dump_file(properties, properties_file)
+  end
+
+  def set_alpine_properties
+    alpine_config = <<-CONFIG
+chorus.active = true
+chorus.port = 8080'
+    CONFIG
+    alpine_config_filename = "#{ALPINE_DESTINATION_PATH}/ALPINE_DATA_REPOSITORY/configuration/alpine.config"
+    File.open(alpine_config_filename, 'w').write(alpine_config)
   end
 
   private
