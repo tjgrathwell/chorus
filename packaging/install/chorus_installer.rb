@@ -551,13 +551,16 @@ class ChorusInstaller
   end
 
   def configure_alpine
+    log "Extracting #{alpine_installer} to #{alpine_destination_path}"
     alpine_installer = Dir.glob(File.join(alpine_source_path, 'Alpine*.zip')).first
     extract_alpine(alpine_installer)
 
+    log "Configuring alpine"
     set_properties({"work_flow.enabled" => true, "work_flow.url" => "http://localhost:9090"})
     set_alpine_properties
 
-    server_xml_filename = Dir.glob(File.join(alpine_destination_path, 'apache-tomcat*', 'conf', 'system.xml')).first
+    log "Setting tomcat port"
+    server_xml_filename = Dir.glob(File.join(alpine_destination_path, 'apache-tomcat*', 'conf', 'server.xml')).first
     server_xml = File.read(server_xml_filename)
     server_xml.gsub!('port="8080"', 'port="9090"')
     File.open(server_xml_filename, 'w').write(server_xml)
@@ -568,9 +571,7 @@ class ChorusInstaller
   end
 
   def extract_alpine(alpine_installer)
-    log "Extracting #{alpine_installer} to #{alpine_destination_path}" do
-      system("unzip #{alpine_installer} -d #{alpine_destination_path}")
-    end
+    system("unzip #{alpine_installer} -d #{alpine_destination_path}")
   end
 
   def set_properties(new_properties)

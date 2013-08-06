@@ -1244,7 +1244,7 @@ describe ChorusInstaller do
       FileUtils.mkdir_p("#{installer.alpine_destination_path}/apache-tomcat-7.0.30/conf/")
       FileUtils.mkdir_p("#{installer.alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/")
 
-      File.open("#{installer.alpine_destination_path}/apache-tomcat-7.0.30/conf/system.xml", 'w') do |f|
+      File.open("#{installer.alpine_destination_path}/apache-tomcat-7.0.30/conf/server.xml", 'w') do |f|
         f.puts <<-XML
 <Connector port="8080" protocol="HTTP/1.1"
 connectionTimeout="20000"
@@ -1275,7 +1275,7 @@ chorus.port = 8080'
     it "sets properties in alpine's tomcat config to set port" do
       installer.configure_alpine
 
-      changed_xml = File.read("#{installer.alpine_destination_path}/apache-tomcat-7.0.30/conf/system.xml")
+      changed_xml = File.read("#{installer.alpine_destination_path}/apache-tomcat-7.0.30/conf/server.xml")
       changed_xml.should == <<-XML
 <Connector port="9090" protocol="HTTP/1.1"
 connectionTimeout="20000"
