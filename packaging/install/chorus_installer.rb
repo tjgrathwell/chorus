@@ -566,7 +566,7 @@ class ChorusInstaller
     File.open(server_xml_filename, 'w').write(server_xml)
 
     log "Starting alpine..." do
-      #@executor.start_alpine
+      @executor.start_alpine
     end
   end
 
@@ -587,7 +587,7 @@ chorus.active = true
 chorus.port = 8080'
     CONFIG
     alpine_config_filename = "#{alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/alpine.config"
-    File.open(alpine_config_filename, 'w').write(alpine_config)
+    File.open(alpine_config_filename, 'w') {|f| f.write(alpine_config)}
     stuff = File.open(alpine_config_filename).read()
     log "#{stuff} from #{alpine_config_filename}"
   end
