@@ -551,8 +551,8 @@ class ChorusInstaller
   end
 
   def configure_alpine
-    log "Extracting #{alpine_installer} to #{alpine_destination_path}"
     alpine_installer = Dir.glob(File.join(alpine_source_path, 'Alpine*.zip')).first
+    log "Extracting #{alpine_installer} to #{alpine_destination_path}"
     extract_alpine(alpine_installer)
 
     log "Configuring alpine"
