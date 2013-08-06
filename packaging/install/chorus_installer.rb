@@ -584,7 +584,7 @@ class ChorusInstaller
   def set_alpine_properties
     alpine_config = <<-CONFIG
 chorus.active = true
-chorus.port = 8080'
+chorus.port = 8080
     CONFIG
     alpine_config_filename = "#{alpine_destination_path}/ALPINE_DATA_REPOSITORY/configuration/alpine.config"
     File.open(alpine_config_filename, 'w') {|f| f.write(alpine_config)}
