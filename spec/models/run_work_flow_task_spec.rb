@@ -88,4 +88,24 @@ describe RunWorkFlowTask do
       end
     end
   end
+
+  describe '#kill' do
+    let(:task) { job_tasks(:rwft) }
+    let(:process_id) { '902100fop' }
+
+    it "uses a process_id to request a cancelation through de Alpine API" do
+      stub(Alpine::API).run_work_flow_task(task.payload) { process_id }
+      mock(Alpine::API).cancel_work_flow(process_id)
+
+      thread = Thread.new do
+        result = task.perform
+        result.status.should == JobTaskResult::FAILURE
+      end
+      wait_until { task.reload.killable_id }
+
+      task.kill
+
+      thread.join
+    end
+  end
 end

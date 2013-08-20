@@ -4,9 +4,12 @@ class RunWorkFlowTask < JobTask
 
   def perform
     result = JobTaskResult.create(:started_at => Time.current, :name => build_task_name)
-    Alpine::API.run_work_flow_task(self)
-    update_attribute(:status, JobTask::RUNNING)
+
+    puts "performing"
+    run_workflow
     wait_until { finished? }
+    raise StandardError.new('Canceled by User') unless killable_id
+
     result.finish :status => JobTaskResult::SUCCESS, :payload_id => payload.id, :payload_result_id => payload_result_id
   rescue StandardError => e
     result.finish :status => JobTaskResult::FAILURE, :message => e.message
@@ -32,10 +35,16 @@ class RunWorkFlowTask < JobTask
   end
 
   def kill
-    #Need a way to reference the current work flow running
+    update_attribute(:killable_id, nil) if Alpine::API.cancel_work_flow(killable_id)
   end
 
   private
+
+  def run_workflow
+    killable_id = Alpine::API.run_work_flow_task(self)
+    puts "ran workflow"
+    update_attributes!(:status => JobTask::RUNNING, :killable_id => killable_id)
+  end
 
   def finished?
     reload.status == JobTask::FINISHED

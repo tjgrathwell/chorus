@@ -177,6 +177,11 @@ describe Alpine::API do
       }.to raise_error(StandardError, 'oh no')
     end
 
+    it "returns the process_id from alpine on success" do
+      FakeWeb.register_uri(:post, %r|method=runWorkFlow|, :status => 200, :body => '{"process_id": "90210"}')
+      subject.run_work_flow(work_flow).should == 90210
+    end
+
     context "when called with a task" do
       let(:task) { job_tasks(:rwft) }
 
